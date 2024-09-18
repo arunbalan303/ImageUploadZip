@@ -1,7 +1,7 @@
 import React from 'react';
-import UppyComponent from './videoUpload/index.jsx'; 
+import UppyComponent from './imageUploads/index'; 
 function App() {
-  const allowedFileTypes = ['video/*']; 
+  const allowedFileTypes = ["image/jpeg", "image/png", "image/webp"]; 
   const maxFileSize = 5 * 1024 * 1024; 
   return (
     <div>
