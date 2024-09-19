@@ -19,6 +19,8 @@ function UppyComponent({
 
   const uploadPath = 'https://tusd.tusdemo.net/files/';
 
+  const customLandscapeRatio = 864 / 355; 
+
   const configureUppy = useCallback(() => {
     const instance = new Uppy({
       restrictions: {
@@ -30,12 +32,16 @@ function UppyComponent({
       .use(Webcam)
       .use(ImageEditor, {
         cropperOptions: {
-          aspectRatio: imageOrientation === 'square' ? 1 : (imageOrientation === 'landscape' ? 16 / 9 : null),
+          aspectRatio: imageOrientation === 'square' 
+            ? 1 
+            : (imageOrientation === 'landscape' 
+              ? customLandscapeRatio 
+              : null), 
           croppedFileType: 'image/jpeg',
           viewMode: 1,
           dragMode: 'move',
           autoCropArea: 1,
-          cropBoxResizable: false,
+          cropBoxResizable: imageOrientation === 'any', 
           cropBoxMovable: true,
           zoomable: true,
           rotatable: false,
@@ -63,7 +69,7 @@ function UppyComponent({
       });
 
     return instance;
-  }, [multiple, allowedExtensions, fileSize, imageOrientation, uploadPath]);
+  }, [multiple, allowedExtensions, fileSize, imageOrientation, uploadPath, customLandscapeRatio]);
 
   useEffect(() => {
     const instance = configureUppy();
@@ -111,7 +117,16 @@ function UppyComponent({
             checked={imageOrientation === 'landscape'}
             onChange={handleOrientationChange}
           />
-          Landscape
+          Landscape 
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="any"
+            checked={imageOrientation === 'any'}
+            onChange={handleOrientationChange}
+          />
+          Any
         </label>
       </div>
       {uppy && (
@@ -119,7 +134,7 @@ function UppyComponent({
           uppy={uppy}
           plugins={['Webcam', 'ImageEditor']}
           proudlyDisplayPoweredByUppy={false}
-          autoOpen="imageEditor" 
+          autoOpen={multiple ? false : 'imageEditor'}
         />
       )}
     </div>
