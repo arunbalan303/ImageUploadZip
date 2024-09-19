@@ -1,5 +1,5 @@
 import React from 'react';
-import UppyComponent from './imageUpload/index'; 
+import UppyComponent from './imageUploads/index'; 
 import UppyVideoComponent from './videoUpload';
 function App() {
   const allowedFileTypes = ['image/jpeg', 'image/png', 'image/webp']; 
