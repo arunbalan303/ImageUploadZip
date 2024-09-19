@@ -1,15 +1,26 @@
 import React from 'react';
-import UppyComponent from './ImageUpload/index'; 
+import UppyComponent from './imageUpload/index'; 
+import UppyVideoComponent from './videoUpload';
 function App() {
   const allowedFileTypes = ['image/jpeg', 'image/png', 'image/webp']; 
-  const maxFileSize = 5 * 1024 * 1024; 
+  const allowedVideoTypes=['video/*'];
+  const maxImageSize = 5 * 1024 * 1024; 
+  const maxVideoSize = 100 * 1024 * 1024; 
   return (
     <div>
-      <h1>File Upload Example</h1>
+      <h1> Image Upload </h1>
       <UppyComponent 
         allowedExtensions={allowedFileTypes}
-        fileSize={maxFileSize}
+        fileSize={maxImageSize}
       />
+       
+
+      <h1> Video Upload </h1>
+      <UppyVideoComponent
+        allowedExtensions={allowedVideoTypes}
+        fileSize={maxVideoSize}
+      />
+
     </div>
   );
 }
