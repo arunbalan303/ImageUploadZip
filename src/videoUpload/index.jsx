@@ -11,6 +11,7 @@ function UppyVideoComponent({
 }) {
   const [multiple, setMultiple] = useState(false);
   const [uppy, setUppy] = useState(null);
+  const [uploadURLs, setUploadURLs] = useState([]);
 
   const uploadPath = 'https://tusd.tusdemo.net/files/';
 
@@ -37,10 +38,36 @@ function UppyVideoComponent({
 
   useEffect(() => {
     const instance = configureUppy();
+
+    let fileUploadPromises = [];
+
+    // Capture URLs after all uploads complete
+    instance.on('file-added', (file) => {
+      fileUploadPromises.push(
+        new Promise((resolve) => {
+          instance.on('upload-success', (file, response) => {
+            const uploadURL = response.uploadURL;
+            resolve(uploadURL);
+          });
+        })
+      );
+    });
+
+    instance.on('complete', () => {
+      Promise.all(fileUploadPromises)
+        .then((urls) => {
+          console.log('All files uploaded successfully:', urls);
+          setUploadURLs(urls); // Set the URLs when all files are uploaded
+        })
+        .catch((err) => {
+          console.error('Error uploading files:', err);
+        });
+    });
+
     setUppy(instance);
 
     return () => {
-      instance.cancelAll();
+      instance.cancelAll(); // Cancel any ongoing uploads
     };
   }, [configureUppy]);
 

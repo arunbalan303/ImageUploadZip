@@ -13,13 +13,13 @@ function UppyComponent({
   allowedExtensions = [],
   fileSize,
 }) {
-  const [multiple, setMultiple] = useState(false); 
+  const [multiple, setMultiple] = useState(false);
   const [imageOrientation, setImageOrientation] = useState('square');
   const [uppy, setUppy] = useState(null);
+  const [uploadURLs, setUploadURLs] = useState([]);
 
   const uploadPath = 'https://tusd.tusdemo.net/files/';
-
-  const customLandscapeRatio = 864 / 355; 
+  const customLandscapeRatio = 864 / 355;
 
   const configureUppy = useCallback(() => {
     const instance = new Uppy({
@@ -32,16 +32,16 @@ function UppyComponent({
       .use(Webcam)
       .use(ImageEditor, {
         cropperOptions: {
-          aspectRatio: imageOrientation === 'square' 
-            ? 1 
-            : (imageOrientation === 'landscape' 
-              ? customLandscapeRatio 
-              : null), 
+          aspectRatio: imageOrientation === 'square'
+            ? 1
+            : (imageOrientation === 'landscape'
+              ? customLandscapeRatio
+              : null),
           croppedFileType: 'image/jpeg',
           viewMode: 1,
           dragMode: 'move',
           autoCropArea: 1,
-          cropBoxResizable: imageOrientation === 'any', 
+          cropBoxResizable: imageOrientation === 'any',
           cropBoxMovable: true,
           zoomable: true,
           rotatable: false,
@@ -53,8 +53,8 @@ function UppyComponent({
           flip: false,
           zoomIn: false,
           zoomOut: false,
-          cropSquare: imageOrientation === 'square',
-          cropWidescreen: imageOrientation === 'landscape',
+          cropSquare: false,
+          cropWidescreen: false,
           cropWidescreenVertical: false,
         },
       })
@@ -73,6 +73,32 @@ function UppyComponent({
 
   useEffect(() => {
     const instance = configureUppy();
+
+    let fileUploadPromises = [];
+
+    // Capture URLs after all uploads complete
+    instance.on('file-added', (file) => {
+      fileUploadPromises.push(
+        new Promise((resolve) => {
+          instance.on('upload-success', (file, response) => {
+            const uploadURL = response.uploadURL;
+            resolve(uploadURL);
+          });
+        })
+      );
+    });
+
+    instance.on('complete', () => {
+      Promise.all(fileUploadPromises)
+        .then((urls) => {
+          console.log('All files uploaded successfully:', urls);
+          setUploadURLs(urls); // Set the URLs when all files are uploaded
+        })
+        .catch((err) => {
+          console.error('Error uploading files:', err);
+        });
+    });
+
     setUppy(instance);
 
     return () => {
@@ -117,7 +143,7 @@ function UppyComponent({
             checked={imageOrientation === 'landscape'}
             onChange={handleOrientationChange}
           />
-          Landscape 
+          Landscape
         </label>
         <label>
           <input
@@ -130,7 +156,7 @@ function UppyComponent({
         </label>
       </div>
       {uppy && (
-        <Dashboard 
+        <Dashboard
           uppy={uppy}
           plugins={['Webcam', 'ImageEditor']}
           proudlyDisplayPoweredByUppy={false}
